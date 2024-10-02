@@ -1,18 +1,3 @@
-// import React from 'react'
-// import { useParams } from 'react-router-dom';
-// import "./EmployeeDetail.css";
-// const EmployeeDetail = () => {
-// const { id,name } = useParams();
-
-//   return (
-//     <div className='employee-detail'>
-//       <p>ID nhân viên: {id}</p>
-//       <p>tên nhân viên: {name}</p>
-//     </div>
-//   )
-// }
-
-// export default EmployeeDetail
 
 import React from 'react'
 import { useParams } from 'react-router-dom';

@@ -22,15 +22,7 @@ const FilterHeader = ({menu,setMenu,click }) => {
             <div className="filterheader-right-dot">
                 <Ellipsis className='dot'/>
             </div>
-            {/* <div className="filterheader-right-plus">
-                <div>
-                    <Plus className="filterheader-right-plus-icon"/>
-                </div>
-                <div className="filterheader-right-plus-text">
-                    Thêm
-                </div>
-                
-            </div> */}
+           
         </div>
     </div>
   )

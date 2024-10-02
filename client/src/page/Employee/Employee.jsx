@@ -7,7 +7,7 @@ import { Filter} from 'lucide-react';
 import {Link} from "react-router-dom";
 const Employee = ({open,setOpen,onHeaderClick,clickLink,toggleDialog}) => {
   useEffect(() => {
-    setOpen(false);
+    setOpen(true);
   }, [clickLink]);
   const data = [
     {id:'1', name: 'HR-LPOL-2024-00007', status: 'đã kích hoạt', eplcode:"",ngaysinh:"19/05/2003",chinhanh:'',ten:"abc" },
@@ -70,9 +70,7 @@ const Employee = ({open,setOpen,onHeaderClick,clickLink,toggleDialog}) => {
   return (
     <div className='employee'>
       <FilterHeader click={onHeaderClick} />
-      { !open && (
-              <FilterSidebar open={open} setOpen={setOpen} />
-            )}
+      <FilterSidebar />
       <div className='table'>
         <div className="table-header">
               <div className="search-filter">
