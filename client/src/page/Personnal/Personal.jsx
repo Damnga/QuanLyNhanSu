@@ -24,15 +24,15 @@ const Personal = ({click,setClick,clickLink,setClickLink,pathshortcut,setPathsho
     { id: 8, name: "Bảo Hiểm Sức Khỏe Nhân Viên", path: "/app/employee_HealthInsurance" },
   ];
   const employee_life_cycle=[
-    {name:"Đào Tạo Nhân Viên Mới"},
-    {name:"Bản Đồ Kĩ Năng Nhân Viên"},
-    {name:"Đề Bạt Nhân Viên"},
-    {name:"Điều Chuyển Nhân Viên"},
-    {name:"Loại Khiếu Nại"},
-    {name:"Khiếu Nại"},
-    {name:"Tách Nhân Viên"},
-    {name:"Mẫu Đào Tạo Nhân Viên Mới"},
-    {name:"Mẫu Tách Nhân Viên"},
+    {id: 1,name:"Đào Tạo Nhân Viên Mới", path: "/app/trainning_new_employee"},
+    {id: 2,name:"Bản Đồ Kĩ Năng Nhân Viên", path: "/app/employee_skill_map"},
+    {id: 3,name:"Đề Bạt Nhân Viên", path: "/app/employee_promotion"},
+    {id: 4,name:"Điều Chuyển Nhân Viên", path: "/app/employee_transfer"},
+    {id: 5,name:"Loại Khiếu Nại", path: "/app/type_of_talent"},
+    {id: 6,name:"Khiếu Nại", path: "/app/talents"},
+    {id: 7,name:"Tách Nhân Viên", path: "/app/employee_separation"},
+    {id: 8,name:"Mẫu Đào Tạo Nhân Viên Mới", path: "/app/trainning_new_employee_prototype"},
+    {id: 9,name:"Mẫu Tách Nhân Viên", path: "/app/employee_separation_prototype"},
   ];
   const shift_management=[
     {name:"Loại Ca Làm"},
