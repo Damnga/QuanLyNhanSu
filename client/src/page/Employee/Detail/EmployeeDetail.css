@@ -17,7 +17,13 @@
     width:215px;
     height:215px;
     background-color: white;
-    border-radius: 10px;
+    border-radius: 15px;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    font-size: 45px;
+    border :1px solid black;
 }
 .giao{
     font-size: 15px;
@@ -228,12 +234,29 @@ textarea,select{
     width :1050px;
     background-color: rgb(244,245,246);
 }
-.save-part{
+
+.dropdown-menu {
+    display: none; 
+    position: absolute;
+    background-color: white; 
+    border: 1px solid #ccc; 
+    z-index: 1; 
+}
+
+.dropdown-menu.show {
+    display: block; 
+    margin-top: 50px;
+    margin-left: 20px;
+}
+
+.save-part {
+    background-color: red; 
+    color: white; 
+    border: none; 
+    cursor: pointer; 
     height: 35px;
     width: 100px;
     border-radius: 10px;
-    background-color: rgb(36,144,239);
-    border:1px solid white;
-    color:white;
-    margin-top: 10px;
+    position: absolute;
+    z-index:1;
 }

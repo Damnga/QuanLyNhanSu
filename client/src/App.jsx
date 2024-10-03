@@ -8,6 +8,8 @@ import { useState } from "react";
 import Employee from "./page/Employee/Employee";
 import EmployeeDetail from "./page/Employee/Detail/EmployeeDetail"; 
 import "./index.css";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { useEffect } from "react";
 import Login from "./page/Login/Login";
@@ -28,6 +30,8 @@ import Talents from "./page/EmployeeLifeCycle/Talents/Talents";
 import EmployeeSeparation from "./page/EmployeeLifeCycle/EmployeeSeparation/EmployeeSeparation";
 import TrainningNewEmployeePrototype from "./page/EmployeeLifeCycle/TrainningNewEmployeePrototype/TrainningNewEmployeePrototype";
 import EmployeeSeparationPrototype from "./page/EmployeeLifeCycle/EmployeeSeparationPrototype/EmployeeSeparationPrototype";
+import {NhanVien} from "./api/data";
+import { useParams } from 'react-router-dom';
 const App = () => {
   const location = useLocation();
   const isEmployeeRoute = location.pathname === '/app/employee';
@@ -74,8 +78,10 @@ const App = () => {
     }
   }, [isLoginOpen]);
 
+  
   return (
     <>
+    <ToastContainer />
       {isDialogInsertOpen && (
         <Insert setIsDialogInsertOpen={setIsDialogInsertOpen} />
       )}

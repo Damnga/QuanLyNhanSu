@@ -6,6 +6,7 @@ const getAll =()=>{
             resolve(API);
         },1);
     });
+    //return axiosClient.get(URL,params)
 };
 
 export default {getAll};

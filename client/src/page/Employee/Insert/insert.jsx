@@ -1,6 +1,9 @@
 import React, { useState } from 'react'
 import "./insert.css";
-import {ChevronDown,Settings,Pencil,Asterisk,CircleX} from "lucide-react";
+import {ChevronDown,Asterisk} from "lucide-react";
+import {NhanVien} from "../../../api/data";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 const insert = ({setIsDialogInsertOpen}) => {
 
 const [click1,setClick1]=useState(false);
@@ -103,11 +106,50 @@ const [data, setData] = useState([]);
         setSelectedItems(updatedData.map(() => false));
         setSelectAll(false);
 };
+const [employeeData, setEmployeeData] = useState({
+  ID:"",
+  Ten: '',
+  Dem: '',
+  Ho: '',
+  GioiTinh: '',
+  NgaySinh: '',
+  CapBac:"",
+  ChiNhanh:"",
+  Sdt:"",
+  DiaChi:"",
+  LoaiNhanVien: '',
+  NgayNhanViec: '',
+  CCCD: '',
+  NgayKetThuc: '',
+});
+
+const handleChange = (e) => {
+  const { name, value } = e.target;
+  setEmployeeData(prevData => ({
+      ...prevData,
+      [name]: value
+  }));
+};
+const handleSave = () => {
+  try {
+    const newEmployee = {
+      ...employeeData,
+      ID: Math.floor(Math.random() * 10000)
+  };
+  NhanVien.push(newEmployee);
+  toast.success('Nhân viên mới đã được tạo thành công!', {
+  position: "top-right",
+  });
+  } catch (error) {
+    toast.error(error.message(), {
+      position: "top-right",
+      });
+  }
+};
   return (
-    
     <div className='insert_employee'>
         <div className="save">
-          <button className="btn-save">
+          <button className="btn-save" onClick={handleSave}>
             Lưu
           </button>
           <div className="exit">
@@ -122,72 +164,56 @@ const [data, setData] = useState([]);
               {click1 &&(
                 <div className="input-content" >
                   <div class="input-group">
-                      <div className='input-title'>Mã Số</div>
-                      <select className='input-option'>
-                        <option>HR-EMP-</option>
-                      </select>
+                      <div className='input-title'>Họ<Asterisk className='red'/></div>
+                      <input className='input-option' type="text"onChange={handleChange} name="Ho" />
                   </div>
                   <div class="input-group">
-                      <div className='input-title'>Công Ty<Asterisk className='red'/></div>
-                      <input className='input-option' type="text"  />
+                      <div className='input-title'>Tên Đệm<Asterisk className='red'/></div>
+                      <input className='input-option' type="text"onChange={handleChange} name="TenDem" />
                   </div>
                   <div class="input-group">
                       <div className='input-title'>Tên<Asterisk className='red'/></div>
-                      <input className='input-option' type="text"  />
+                      <input className='input-option' type="text"onChange={handleChange} name="Ten" />
                   </div>
                   <div class="input-group">
-                      <div className='input-title'>Trạng Thái <Asterisk className='red'/></div>
-                      <select className='input-option'>
-                        <option>Đã Kích Hoạt</option>
-                      </select>
-                  </div>
-                  <div class="input-group">
-                      <div  className='input-title'>Đệm</div>
-                      <input className='input-option' type="text"  />
-                  </div>
-                  <div class="input-group">
-                      <div className='input-title'>Giới Tính<Asterisk className='red'/></div>
-                      <input className='input-option' type="text" />
-                  </div>
-                  <div class="input-group">
-                      <div className='input-title'>Họ</div>
-                      <input className='input-option' type="text"  />
+                      <div className='input-title'>Giới Tính <Asterisk className='red'/></div>
+                      <input className='input-option' type="text"onChange={handleChange} name="GioiTinh" />
                   </div>
                   <div class="input-group">
                       <div className='input-title'>Ngày Sinh<Asterisk className='red'/></div>
-                      <input className='input-option' type="text" />
+                      <input className='input-option' type="text"onChange={handleChange} name="NgaySinh" />
+                  </div>
+                  <div class="input-group">
+                      <div className='input-title'>Cấp Bậc<Asterisk className='red'/></div>
+                      <input className='input-option' type="text"onChange={handleChange} name="CapBac" />
+                  </div>
+                  <div class="input-group">
+                      <div className='input-title'>Chi Nhánh<Asterisk className='red'/></div>
+                      <input className='input-option' type="text"onChange={handleChange} name="ChiNhanh" />
+                  </div>
+                  <div class="input-group">
+                      <div className='input-title'>Sdt<Asterisk className='red'/></div>
+                      <input className='input-option' type="text"onChange={handleChange} name="Sdt" />
+                  </div>
+                  <div class="input-group">
+                      <div className='input-title'>Địa Chỉ<Asterisk className='red'/></div>
+                      <input className='input-option' type="text"onChange={handleChange} name="DiaChi" />
                   </div>
                   <div class="input-group">
                       <div className='input-title'>Loại Nhân Viên</div>
-                      <input className='input-option' type="text"  />
+                      <input className='input-option' type="text"onChange={handleChange} name="LoaiNhanVien" />
                   </div>
                   <div class="input-group">
                       <div className='input-title'>Ngày Nhận Việc<Asterisk className='red'/></div>
-                      <input className='input-option' type="text" />
+                      <input className='input-option' type="text"onChange={handleChange} name="NgayNhanViec" />
                   </div>
                   <div class="input-group">
-                      <div className='input-title'>Thẻ CCCD<Asterisk className='red'/></div>
-                      <input className='input-option' type="text"  />
+                      <div className='input-title'>CCCD<Asterisk className='red'/></div>
+                      <input className='input-option' type="text"onChange={handleChange} name="CCCD" />
                   </div>
                   <div class="input-group">
-                      <div className='input-title'>Công Ty</div>
-                      <input className='input-option' type="text" />
-                  </div>
-                  <div class="input-group">
-                      <div className='input-title'>Ngày Kết Thúc Làm Việc</div>
-                      <input className='input-option' type="text"  />
-                  </div>
-                  <div class="input-group">
-                      <div className='input-title'>Ảnh</div>
-                      <input className='input-option' type="file" />
-                  </div>
-                  <div class="input-group">
-                      <div className='input-title'>Số Nhân Viên<Asterisk className='red'/></div>
-                      <input className='input-option' type="text"  />
-                  </div>
-                  <div class="input-group">
-                      <div className='input-title'>Mã Số Thuế</div>
-                      <input className='input-option' type="text" />
+                      <div className='input-title'>Ngày Kết Thúc</div>
+                      <input className='input-option' type="text"onChange={handleChange} name="NgayKetThuc" />
                   </div>
                 </div>
               )}
@@ -316,7 +342,7 @@ const [data, setData] = useState([]);
               {click7 &&(
                 <div className="input-content7" >
                   <div class="input-group">
-                      <div className='input-title'>Mức Lương Đóng Bảo Hiểm<Asterisk className='red'/></div>
+                      <div className='input-title'>Mức Lương Đóng Bảo Hiểm</div>
                       <input className='input-option' type="text"  />
                   </div>
                   <div class="input-group">
@@ -349,31 +375,31 @@ const [data, setData] = useState([]);
               {click8 &&(
                 <div className="input-content8" >
                   <div class="input-group">
-                      <div className='input-title'>Lương Vị Trí<Asterisk className='red'/></div>
+                      <div className='input-title'>Lương Vị Trí</div>
                       <input className='input-option' type="text" />
                   </div>
                   <div class="input-group">
-                      <div className='input-title'>Phần Trăm Lương Thử Việc<Asterisk className='red'/></div>
+                      <div className='input-title'>Phần Trăm Lương Thử Việc</div>
                       <input className='input-option' type="text"  />
                   </div>
                   <div class="input-group">
-                      <div className='input-title'>Tổng Trả<Asterisk className='red'/></div>
+                      <div className='input-title'>Tổng Trả</div>
                       <input className='input-option' type="text" />
                   </div>
                   <div class="input-group">
-                      <div className='input-title'>Phụ Cấp Ăn Trưa<Asterisk className='red'/></div>
+                      <div className='input-title'>Phụ Cấp Ăn Trưa</div>
                       <input className='input-option' type="text"  />
                   </div>
                   <div class="input-group">
-                      <div className='input-title'>Phụ Cấp Xăng Xe,Di Chuyển<Asterisk className='red'/></div>
+                      <div className='input-title'>Phụ Cấp Xăng Xe,Di Chuyển</div>
                       <input className='input-option' type="text" />
                   </div>
                   <div class="input-group">
-                      <div className='input-title'>Phụ Cấp Chuyên Cần<Asterisk className='red'/></div>
+                      <div className='input-title'>Phụ Cấp Chuyên Cần</div>
                       <input className='input-option' type="text"  />
                   </div>
                   <div class="input-group">
-                      <div className='input-title'>Phụ Cấp Điện Thoại<Asterisk className='red'/></div>
+                      <div className='input-title'>Phụ Cấp Điện Thoại</div>
                       <input className='input-option' type="text" />
                   </div>
                 </div>

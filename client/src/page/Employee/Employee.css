@@ -64,6 +64,8 @@
     padding-top: 20px;
     display:grid ;
     flex-direction: column; 
+    overflow-x: auto;
+    width: 100%;
 }
 .table-filter{
     margin-top: 20px;
@@ -72,7 +74,7 @@
 }
 .format{
     display: grid;
-    grid-template-columns: 0.5fr 1.25fr 1fr 1fr 1fr 1fr 0.5fr;
+    grid-template-columns: 0.2fr 0.5fr 0.75fr 0.5fr 1fr 1fr 0.2fr  1fr 1fr 1fr 1fr 1fr 1fr  ;
     align-items: center;
     gap:10px;
     padding:12px 15px;
@@ -82,7 +84,7 @@
 
 .format-title{
     display: grid;
-    grid-template-columns: 0.5fr 1.25fr 1fr 1fr 1fr 1fr 0.5fr;
+    grid-template-columns: 0.2fr 0.5fr 0.75fr 0.5fr 1fr 1fr 0.2fr 1fr 1fr 1fr 1fr 1fr 1fr ;
     align-items: center;
     gap:10px;
     padding:12px 15px;

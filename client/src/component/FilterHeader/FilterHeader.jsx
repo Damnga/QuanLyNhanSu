@@ -1,7 +1,13 @@
 import React from 'react'
 import "./FilterHeader.css";
 import { AlignJustify,Blinds, Ellipsis, Plus, RotateCw} from 'lucide-react';
-const FilterHeader = ({menu,setMenu,click }) => {
+import { useState } from 'react';
+const FilterHeader = ({menu,setMenu,click ,onDelete}) => {
+    const [dropdown,setDropdown]= useState(false);
+    const drop =()=>{
+        setDropdown(!dropdown);
+      };
+   
   return (
     <div className="filterheader">
         <div className="filterheader-left">
@@ -19,9 +25,12 @@ const FilterHeader = ({menu,setMenu,click }) => {
             <div className="filterheader-right-refesh">
                 <RotateCw className='refesh'/>
             </div>
-            <div className="filterheader-right-dot">
+            <div onClick={drop} className="filterheader-right-dot">
                 <Ellipsis className='dot'/>
             </div>
+            <div className={`dropdown-menu ${dropdown ? 'show' : ''}`}>
+              {dropdown?<button onClick={onDelete} className='save-part'>Xóa</button>:""}
+              </div>
            
         </div>
     </div>
