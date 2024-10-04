@@ -23,13 +23,13 @@ const LoaiNhanVien=[
   { ID: "004", LoaiNhanVien: "Hợp Đồng" },
 ];
 const ChiNhanh =[
-  { ID: "001", LoaiNhanVien: "Hà Nội" },
-  { ID: "002", LoaiNhanVien: "TP.Hồ Chí Minh" },
-  { ID: "003", LoaiNhanVien: "Hải Phòng" },
-  { ID: "004", LoaiNhanVien: "Đà Nẵng" },
-  { ID: "005", LoaiNhanVien: "Nha Trang" },
-  { ID: "006", LoaiNhanVien: "Cần Thơ" },
-  { ID: "007", LoaiNhanVien: "Huế" },
+  { ID: "001", ChiNhanh: "Hà Nội" },
+  { ID: "002", ChiNhanh: "TP.Hồ Chí Minh" },
+  { ID: "003", ChiNhanh: "Hải Phòng" },
+  { ID: "004", ChiNhanh: "Đà Nẵng" },
+  { ID: "005", ChiNhanh: "Nha Trang" },
+  { ID: "006", ChiNhanh: "Cần Thơ" },
+  { ID: "007", ChiNhanh: "Huế" },
 ];
 const PhongBan=[
   { ID: "001", PhongBan: "Kinh doanh" },

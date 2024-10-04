@@ -249,7 +249,7 @@ textarea,select{
     margin-left: 20px;
 }
 
-.save-part {
+.remove-part {
     background-color: red; 
     color: white; 
     border: none; 
@@ -259,4 +259,16 @@ textarea,select{
     border-radius: 10px;
     position: absolute;
     z-index:1;
+}
+
+.save-part {
+    background-color: rgb(36,144,239); 
+    color: white; 
+    border: none; 
+    cursor: pointer; 
+    height: 35px;
+    width: 100px;
+    border-radius: 10px;
+    margin-top: 10px;
+    
 }
