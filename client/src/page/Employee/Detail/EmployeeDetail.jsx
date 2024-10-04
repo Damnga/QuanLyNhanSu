@@ -5,7 +5,6 @@ import { useParams } from 'react-router-dom';
 import { useState } from 'react';
 import { AlignJustify,ChevronLeft,ChevronRight,Ellipsis,UserRound,Paperclip,Star,UserPen,Tag,ChevronDown,Asterisk} from 'lucide-react';
 import CustomHeatmap from '../../../component/CustomHeatmap/CustomHeatmap';
-import {NhanVien} from "../../../api/data";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useEffect } from 'react';

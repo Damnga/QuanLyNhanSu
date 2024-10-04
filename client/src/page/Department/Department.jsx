@@ -4,39 +4,70 @@ import FilterHeader from '../../component/FilterHeader/FilterHeader';
 import FilterSidebar from '../../component/FilterSidebar/FilterSidebar';
 import { useState } from 'react';
 import { Filter} from 'lucide-react';
-import { PhongBan } from '../../api/data';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 const Department = () => {
+  const navigate = useNavigate();
+const API_URL = 'http://localhost:1323/PhongBan';
 const [selectAll, setSelectAll] = useState(false);
-const [selectedItems, setSelectedItems] = useState(PhongBan.map(() => false));
+const [selectedItems, setSelectedItems] = useState([]);
 const [insert, setInsert] = useState(false);
   const [edit, setEdit] = useState(false);
   const [editingId, setEditingId] = useState(null); 
-  const [phongban, setPhongBan] = useState({
-    ID: "",
+  const [phongbanData, setPhongBanData] = useState({
     PhongBan: "",
+    ID_ChiNhanh:"",
   });
+  const BRANCH_API_URL = 'http://localhost:1323/ChiNhanh';
+const [branches, setBranches] = useState([]);
+  const [phongban,setPhongban]=useState([]);
+  useEffect(() => {
+    fetchDepartment();
+    fetchBranches();
+  }, []);
+  const fetchBranches = async () => {
+    try {
+      const response = await fetch(BRANCH_API_URL);
+      const data = await response.json();
+      console.log('Fetched branches:', data); // Kiểm tra dữ liệu fetch từ API
+      setBranches(data);
+    } catch (error) {
+      console.error('Error fetching branches:', error);
+    }
+  };
+  const fetchDepartment = async () => {
+    try {
+      const response = await fetch(API_URL);
+      const data = await response.json();
+      setPhongban(data);
+      setSelectedItems(data.map(() => false)); 
+      console.log('Rendering EmployeeType component', phongban);
+    } catch (error) {
+      console.error('Error fetching employee types:', error);
+    }
+  };
+
   const openInsert = () => {
     setInsert(true);
   };
 
   const closeInsert = () => {
     setInsert(false);
-    setPhongBan({ ID: "", PhongBan: "" }); 
+    setPhongBanData({  PhongBan: "",ID_ChiNhanh:"" }); 
   };
 
   const openEdit = (id) => {
-    const itemToEdit = PhongBan.find(item => item.ID === id);
-    setPhongBan(itemToEdit);
+    const itemToEdit = phongban.find(item => item.id === id);
+    setPhongBanData(itemToEdit);
     setEditingId(id); 
     setEdit(true);
   };
 
   const closeEdit = () => {
     setEdit(false);
-    setPhongBan({ ID: "", PhongBan: "" }); 
+    setPhongBanData({  PhongBan: "",ID_ChiNhanh:"" });  
   };
 
   const handleSelectAllChange = (event) => {
@@ -55,22 +86,27 @@ const [insert, setInsert] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setPhongBan(prevData => ({
+    setPhongBanData(prevData => ({
       ...prevData,
       [name]: value
     }));
   };
 
-  const handleSave = () => {
+ 
+  const handleSave = async () => {
     try {
       const newDepartment = {
-        ...phongban,
-        ID: Math.floor(Math.random() * 10000)
+        ...phongbanData,
       };
-      PhongBan.push(newDepartment);
-      toast.success('Phòng Ban mới đã được tạo thành công!', {
+      await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newDepartment),
+      });
+      toast.success('Phòng ban mới đã được tạo thành công!', {
         position: "top-right",
       });
+      fetchDepartment();
       closeInsert();
     } catch (error) {
       toast.error(error.message, {
@@ -79,41 +115,51 @@ const [insert, setInsert] = useState(false);
     }
   };
 
-  const handleEdit = () => {
+  const handleEdit =async (id) => {
+    if (!editingId) return; 
     try {
-      const index = PhongBan.findIndex((e) => e.ID === editingId);
-      if (index !== -1) {
-        PhongBan[index] = phongban;
-        console.log('Thông tin phòng ban đã cập nhật:', phongban);
-        toast.success('Thông tin phòng ban đã cập nhật', {
-          position: "top-right",
+        const response = await fetch(`${API_URL}/${id}`, { 
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(phongbanData),
         });
+
+        if (!response.ok) {
+            const errorMessage = await response.text();
+            throw new Error(`Cập nhật không thành công: ${errorMessage}`);
+        }
+
+        toast.success('Thông tin phòng ban đã cập nhật', {
+            position: "top-right",
+        });
+        await fetchDepartment(); 
         closeEdit(); 
-      }
     } catch (error) {
-      toast.error(error.message, {
-        position: "top-right",
-      });
-      console.log("Thông tin phòng ban đã cập nhật:", error);
-      navigate('/app/departments');
+        toast.error(error.message, {
+            position: "top-right",
+        });
     }
   };
 
-  const handleRemove = (id) => {
+  const handleRemove = async (id) => {
+    if (!id) return; 
     try {
-      const updatedList = PhongBan.filter((item) => item.ID !== id);
-      setSelectedItems(updatedList.map(() => false));
-      toast.success('Phòng Ban đã được xóa thành công!', {
-        position: "top-right",
-      });
-
-      while (PhongBan.length) { PhongBan.pop(); }
-      updatedList.forEach(item => PhongBan.push(item));
+        await fetch(`${API_URL}/${id}`, {
+            method: 'DELETE',
+        });
+        toast.success('Phòng Ban đã được xóa thành công!', {
+            position: "top-right",
+        });
+        fetchDepartment(); 
     } catch (error) {
-      toast.error(error.message, {
-        position: "top-right",
-      });
+        toast.error(error.message, {
+            position: "top-right",
+        });
     }
+  };
+  const getBranchNameById = (id) => {
+    const branch = branches.find(branch => branch.id === id);
+    return branch ? branch.ChiNhanh : 'Unknown';
   };
   return (
     <div className='branch'>
@@ -128,14 +174,34 @@ const [insert, setInsert] = useState(false);
                   <button className='branch-insert-button' onClick={openInsert}> + Thêm Phòng Ban </button>
               </div>
               {insert && (
-  <div className='overlay'> 
+  <div className='overlay'>
     <div className='employee-type-insert'>
       <div className='employee-type-insert-insert'>
         <div className="employee-type-title-insert">
           Thêm Phòng Ban
         </div>
         <div className="employee-type-input-insert">
-          <input type="text" onChange={handleChange} name="LoaiNhanVien" />
+        <form onSubmit={handleSave}>
+            <input
+              type="text"
+              onChange={handleChange}
+              name="PhongBan"
+              value={phongbanData.PhongBan}
+              placeholder="Nhập Phòng Ban"
+              required
+            />
+            <select
+              name="ID_ChiNhanh"
+              value={phongbanData.ID_ChiNhanh}
+              onChange={handleChange}
+              required
+            >
+              <option value="">Chọn Chi Nhánh</option>
+              {branches.map(branch => (
+                <option key={branch.id} value={branch.id}>{branch.ChiNhanh}</option>
+              ))}
+            </select>
+          </form>
         </div>
         <div className="employee-type-save">
           <button onClick={handleSave}>Lưu</button>
@@ -155,44 +221,57 @@ const [insert, setInsert] = useState(false);
             <div className="branch-format-title">
             <b><input type="checkbox" checked={selectAll} 
                         onChange={handleSelectAllChange} /></b>
-            <b>ID</b>
             <b>Phòng Ban</b>
+            <b>Chi Nhánh</b>
         </div>
-            {PhongBan.map((item,index) => {
-              return (
-                <div className='employee-type-format' key={item.ID}>
-                <td>
-                  <input type="checkbox" checked={selectedItems[index]} onChange={handleItemChange(index)} />
-                </td>
-                <td onClick={() => openEdit(item.ID)}>{item.ID}</td>
-                <td onClick={() => openEdit(item.ID)}>{item.PhongBan}</td>
-                {edit && editingId === item.ID && ( 
-                  <div className='overlay'>
-                    <div className='insert'>
-                      <div className='insert-insert'>
-                        <div className="title-insert">
-                          Cập Nhật Phòng Ban
-                        </div>
-                        <div className="input-insert">
-                          <input type="text" onChange={handleChange} value={phongban.PhongBan} name="PhongBan" />
-                        </div>
-                        <div className="save">
-                          <button onClick={handleEdit}>Cập Nhật</button>
-                          <button onClick={closeEdit}>X</button>
-                          <button onClick={() => handleRemove(item.ID)}>Xóa</button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
+        {phongban.map((item, index) => (
+  <div className='employee-type-format' key={item.id}>
+    <div>
+      <input type="checkbox" checked={selectedItems[index]} onChange={handleItemChange(index)} />
+    </div>
+    <div onClick={() => openEdit(item.id)}>{item.PhongBan}</div>
+    <div onClick={() => openEdit(item.id)}>{getBranchNameById(item.ID_ChiNhanh)}</div>
+    {edit && editingId === item.id && (
+      <div className='overlay'>
+        <div className='insert'>
+          <div className='insert-insert'>
+            <div className="title-insert">
+              Cập Nhật Phòng Ban
+            </div>
+            <form onSubmit={handleEdit}>
+              <div className="input-insert">
+                <input
+                  type="text"
+                  onChange={handleChange}
+                  value={phongbanData.PhongBan}
+                  name="PhongBan"
+                  required
+                />
+                <select name="ID_ChiNhanh" value={phongbanData.ID_ChiNhanh} onChange={handleChange}>
+                  <option value="">Chọn Chi Nhánh</option>
+                  {branches.map(branch => (
+                    <option key={branch.id} value={branch.id}>{branch.ChiNhanh}</option>
+                  ))}
+                </select>
               </div>
-              );
-            })}
-        </div>
+              <div className="save">
+                <button type="submit">Cập Nhật</button>
+                <button type="button" onClick={closeEdit}>X</button>
+                <button type="button" onClick={() => handleRemove(item.id)}>Xóa</button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
-  )
+    )}
+  </div>
+))}
+        </div>
+          </div>
+      </div>
+      <ToastContainer />
+  </div>
+);
 }
 
 export default Department

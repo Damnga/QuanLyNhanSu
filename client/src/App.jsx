@@ -30,7 +30,7 @@ import Talents from "./page/EmployeeLifeCycle/Talents/Talents";
 import EmployeeSeparation from "./page/EmployeeLifeCycle/EmployeeSeparation/EmployeeSeparation";
 import TrainningNewEmployeePrototype from "./page/EmployeeLifeCycle/TrainningNewEmployeePrototype/TrainningNewEmployeePrototype";
 import EmployeeSeparationPrototype from "./page/EmployeeLifeCycle/EmployeeSeparationPrototype/EmployeeSeparationPrototype";
-import {NhanVien} from "./api/data";
+
 import { useParams } from 'react-router-dom';
 const App = () => {
   const location = useLocation();

@@ -1,25 +1,41 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react';
 import "./EmployeeLevel.css";
 import FilterHeader from '../../../component/FilterHeader/FilterHeader';
 import FilterSidebar from '../../../component/FilterSidebar/FilterSidebar';
-import { useState } from 'react';
-import { Filter} from 'lucide-react';
-import { CapBac } from '../../../api/data';
+import { Filter } from 'lucide-react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
+
+const API_URL = 'http://localhost:1323/CapBac'; 
+
 const EmployeeLevel = () => {
   const navigate = useNavigate();
   const [selectAll, setSelectAll] = useState(false);
-  const [selectedItems, setSelectedItems] = useState(CapBac.map(() => false));
+  const [selectedItems, setSelectedItems] = useState([]);
   const [insert, setInsert] = useState(false);
   const [edit, setEdit] = useState(false);
   const [editingId, setEditingId] = useState(null); 
-  const [capbac, setCapBac] = useState({
-    ID: "",
+  const [capbacData, setCapBacData] = useState({
     CapBac: "",
     CauTrucLuong: "",
   });
+  const [capbac, setCapbac] = useState([]);
+
+  useEffect(() => {
+    fetchLevel();
+  }, []);
+
+  const fetchLevel = async () => {
+    try {
+      const response = await fetch(API_URL);
+      const data = await response.json();
+      setCapbac(data);
+      setSelectedItems(data.map(() => false)); 
+    } catch (error) {
+      console.error('Error fetching employee levels:', error);
+    }
+  };
 
   const openInsert = () => {
     setInsert(true);
@@ -27,22 +43,19 @@ const EmployeeLevel = () => {
 
   const closeInsert = () => {
     setInsert(false);
-    setCapBac({ ID: "",CapBac: "",
-      CauTrucLuong: "", }); 
+    setCapBacData({ CapBac: "", CauTrucLuong: "" }); 
   };
 
   const openEdit = (id) => {
-    const itemToEdit = CapBac.find(item => item.ID === id);
-    setCapBac(itemToEdit);
+    const itemToEdit = capbac.find(item => item.id === id);
+    setCapBacData(itemToEdit);
     setEditingId(id); 
     setEdit(true);
   };
 
   const closeEdit = () => {
     setEdit(false);
-    setCapBac({ID: "",
-      CapBac: "",
-      CauTrucLuong: ""}); 
+    setCapBacData({ CapBac: "", CauTrucLuong: "" }); 
   };
 
   const handleSelectAllChange = (event) => {
@@ -61,22 +74,25 @@ const EmployeeLevel = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setCapBac(prevData => ({
+    setCapBacData(prevData => ({
       ...prevData,
       [name]: value
     }));
   };
 
-  const handleSave = () => {
+  const handleSave = async (e) => {
+    e.preventDefault(); // Ngăn chặn reload trang
     try {
-      const newCapBac = {
-        ...capbac,
-        ID: Math.floor(Math.random() * 10000)
-      };
-      CapBac.push(newCapBac);
+      const newCapbac = { ...capbacData };
+      await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newCapbac),
+      });
       toast.success('Cấp Bậc mới đã được tạo thành công!', {
         position: "top-right",
       });
+      fetchLevel(); 
       closeInsert();
     } catch (error) {
       toast.error(error.message, {
@@ -85,36 +101,43 @@ const EmployeeLevel = () => {
     }
   };
 
-  const handleEdit = () => {
+  const handleEdit = async (e) => {
+    e.preventDefault(); // Ngăn chặn reload trang
+    if (!editingId) return; 
     try {
-      const index = CapBac.findIndex((e) => e.ID === editingId);
-      if (index !== -1) {
-        CapBac[index] = capbac;
-        console.log('Thông tin cấp bậc đã cập nhật:', capbac);
-        toast.success('Thông tin cấp bậcn đã cập nhật', {
-          position: "top-right",
-        });
-        closeEdit(); 
+      const response = await fetch(`${API_URL}/${editingId}`, { 
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(capbacData),
+      });
+
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(`Cập nhật không thành công: ${errorMessage}`);
       }
+
+      toast.success('Thông tin cấp bậc nhân viên đã được cập nhật', {
+        position: "top-right",
+      });
+      fetchLevel(); 
+      closeEdit(); 
     } catch (error) {
       toast.error(error.message, {
         position: "top-right",
       });
-      console.log("Thông tin cấp bậc đã cập nhật:", error);
-      navigate('/app/employee_level');
     }
   };
 
-  const handleRemove = (id) => {
+  const handleRemove = async (id) => {
+    if (!id) return; 
     try {
-      const updatedList = CapBac.filter((item) => item.ID !== id);
-      setSelectedItems(updatedList.map(() => false));
-      toast.success('Cấp Bậc đã được xóa thành công!', {
+      await fetch(`${API_URL}/${id}`, {
+        method: 'DELETE',
+      });
+      toast.success('Cấp Bậc Nhân viên đã được xóa thành công!', {
         position: "top-right",
       });
-
-      while (CapBac.length) { CapBac.pop(); }
-      updatedList.forEach(item => CapBac.push(item));
+      fetchLevel(); 
     } catch (error) {
       toast.error(error.message, {
         position: "top-right",
@@ -124,91 +147,112 @@ const EmployeeLevel = () => {
 
   return (
     <div className='branch'>
-      <FilterHeader/>
-      <FilterSidebar/>
+      <FilterHeader />
+      <FilterSidebar />
       <div className='branch-table'>
         <div className="branch-table-header">
-              <div className="branch-search-filter">
-                  <input className="branch-search-filter-input" type="text" placeholder='Tìm Kiếm' />
+          <div className="branch-search-filter">
+            <input className="branch-search-filter-input" type="text" placeholder='Tìm Kiếm' />
+          </div>
+          <div className="branch-insert">
+            <button className='branch-insert-button' onClick={openInsert}> + Thêm Cấp Bậc</button>
+          </div>
+          {insert && (
+            <div className='overlay'>
+              <div className='employee-type-insert'>
+                <div className='employee-type-insert-insert'>
+                  <div className="employee-type-title-insert">
+                    Thêm Cấp Bậc Nhân Viên
+                  </div>
+                  <div className="employee-type-input-insert">
+                    <form onSubmit={handleSave}>
+                      <input
+                        type="text"
+                        onChange={handleChange}
+                        name="CapBac"
+                        value={capbacData.CapBac}
+                        placeholder="Nhập cấp bậc nhân viên"
+                        required
+                      />
+                      <input
+                        type="text"
+                        onChange={handleChange}
+                        name="CauTrucLuong"
+                        value={capbacData.CauTrucLuong}
+                        placeholder="Nhập cấu trúc lương"
+                        required
+                      />
+                      <div className="employee-type-save">
+                        <button type="submit">Lưu</button>
+                        <button type="button" onClick={closeInsert}>X</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
               </div>
-              <div className="branch-insert">
-                  <button className='branch-insert-button' onClick={openInsert}> + Thêm Cấp Bậc</button>
-              </div>
-              {insert && (
-  <div className='overlay'> 
-    <div className='employee-type-insert'>
-      <div className='employee-type-insert-insert'>
-        <div className="employee-type-title-insert">
-          Thêm Cấp Bậc
-        </div>
-        <div className="employee-type-input-insert">
-          <input type="text" onChange={handleChange} name="CapBac" />
-        </div>
-        <div className="employee-type-title-insert">
-          Thêm Cấu Trúc Lương
-        </div>
-        <div className="employee-type-input-insert">
-          <input type="text" onChange={handleChange} name="CauTrucLuong" />
-        </div>
-        <div className="employee-type-save">
-          <button onClick={handleSave}>Lưu</button>
-          <button onClick={closeInsert}>X</button>
-        </div>
-      </div>
-    </div>
-  </div>
-)}
-              <div className="branch-filter">
-                  <button className='branch-filter-coponent'><Filter className="filter-icon"/><span>Bộ Lọc</span></button>
-                  <button className='branch-filter-coponent'><div className="filter-icon"/><span>Tác Vụ</span></button>
-              </div>
+            </div>
+          )}
+          <div className="branch-filter">
+            <button className='branch-filter-coponent'><Filter className="filter-icon"/><span>Bộ Lọc</span></button>
+            <button className='branch-filter-coponent'><div className="filter-icon"/><span>Tác Vụ</span></button>
+          </div>
         </div>
         <div className="branch-table-filter">
-        <div className="branch-table-contain">
+          <div className="branch-table-contain">
             <div className="branch-format-title">
-            <b><input type="checkbox" checked={selectAll} 
-                        onChange={handleSelectAllChange} /></b>
-            <b>Cấp Bậc</b>
-            <b>Cấu Trúc Lương</b>
-        </div>
-            {CapBac.map((item,index) => {
-              return (
-                <div className='employee-type-format' key={item.ID}>
-                <td>
+              <b><input type="checkbox" checked={selectAll} onChange={handleSelectAllChange} /></b>
+              <b>Cấp Bậc</b>
+              <b>Cấu Trúc Lương</b>
+            </div>
+            {capbac.map((item, index) => (
+              <div className='employee-type-format' key={item.id}>
+                <div>
                   <input type="checkbox" checked={selectedItems[index]} onChange={handleItemChange(index)} />
-                </td>
-                <td onClick={() => openEdit(item.ID)}>{item.CapBac}</td>
-                <td onClick={() => openEdit(item.ID)}>{item.CauTrucLuong}</td>
-                {edit && editingId === item.ID && ( 
+                </div>
+                <div onClick={() => openEdit(item.id)}>{item.CapBac}</div>
+                <div onClick={() => openEdit(item.id)}>{item.CauTrucLuong}</div>
+                {edit && editingId === item.id && (
                   <div className='overlay'>
                     <div className='insert'>
                       <div className='insert-insert'>
                         <div className="title-insert">
-                          Cập Nhật Cấp Bậc
+                          Cập Nhật Cấp Bậc Nhân Viên
                         </div>
-                        <div className="input-insert">
-                          <input type="text" onChange={handleChange} value={capbac.CapBac} name="CapBac" />
-                        </div>
-                        <div className="input-insert">
-                          <input type="text" onChange={handleChange} value={capbac.CauTrucLuong} name="CauTrucLuong" />
-                        </div>
-                        <div className="save">
-                          <button onClick={handleEdit}>Cập Nhật</button>
-                          <button onClick={closeEdit}>X</button>
-                          <button onClick={() => handleRemove(item.ID)}>Xóa</button>
-                        </div>
+                        <form onSubmit={handleEdit}>
+                          <div className="input-insert">
+                            <input
+                              type="text"
+                              onChange={handleChange}
+                              value={capbacData.CapBac}
+                              name="CapBac"
+                              required
+                            />
+                            <input
+                              type="text"
+                              onChange={handleChange}
+                              value={capbacData.CauTrucLuong}
+                              name="CauTrucLuong"
+                              required
+                            />
+                          </div>
+                          <div className="save">
+                            <button type="submit">Cập Nhật</button>
+                            <button type="button" onClick={closeEdit}>X</button>
+                            <button type="button" onClick={() => handleRemove(item.id)}>Xóa</button>
+                          </div>
+                        </form>
                       </div>
                     </div>
                   </div>
                 )}
               </div>
-              );
-            })}
+            ))}
+          </div>
         </div>
-        </div>
+        <ToastContainer />
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default EmployeeLevel
+export default EmployeeLevel;

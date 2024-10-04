@@ -1,199 +1,237 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react';
 import "./EmployeeGroup.css";
 import FilterHeader from '../../../component/FilterHeader/FilterHeader';
 import FilterSidebar from '../../../component/FilterSidebar/FilterSidebar';
-import { useState } from 'react';
-import { Filter} from 'lucide-react';
-import { NhomNhanVien } from '../../../api/data';
+import { Filter } from 'lucide-react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useNavigate } from 'react-router-dom';
+
+const API_URL = 'http://localhost:1323/NhomNhanVien';
+
 const EmployeeGroup = () => {
+  const [selectAll, setSelectAll] = useState(false);
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [insert, setInsert] = useState(false);
+  const [edit, setEdit] = useState(false);
+  const [editingId, setEditingId] = useState(null); 
+  const [nhomnhanvienData, setNhomnhanvienData] = useState({ NhomNhanVien: "" });
+  const [nhomnhanvien, setNhomnhanvien] = useState([]);
 
-const [selectAll, setSelectAll] = useState(false);
-const [selectedItems, setSelectedItems] = useState(NhomNhanVien.map(() => false));
-const [insert, setInsert] = useState(false);
-const [edit, setEdit] = useState(false);
-const [editingId, setEditingId] = useState(null); 
-const [nhomnhanvien, setNhomnhanvien] = useState({
-  ID: "",
-  NhomNhanVien: "",
-});
-const openInsert = () => {
-  setInsert(true);
-};
+  useEffect(() => {
+    fetchGroup();
+  }, []);
 
-const closeInsert = () => {
-  setInsert(false);
-  setNhomnhanvien({ ID: "", NhomNhanVien: "" });
-};
+  const fetchGroup = async () => {
+    try {
+      const response = await fetch(API_URL);
+      const data = await response.json();
+      setNhomnhanvien(data);
+      setSelectedItems(data.map(() => false)); 
+    } catch (error) {
+      console.error('Error fetching employee types:', error);
+    }
+  };
 
-const openEdit = (id) => {
-  const itemToEdit = NhomNhanVien.find(item => item.ID === id);
-  setNhomnhanvien(itemToEdit);
-  setEditingId(id); 
-  setEdit(true);
-};
+  const openInsert = () => {
+    setInsert(true);
+  };
 
-const closeEdit = () => {
-  setEdit(false);
-  setNhomnhanvien({ ID: "", NhomNhanVien: "" }); 
-};
+  const closeInsert = () => {
+    setInsert(false);
+    setNhomnhanvienData({ NhomNhanVien: "" });
+  };
 
-const handleSelectAllChange = (event) => {
-  const checked = event.target.checked;
-  setSelectAll(checked);
-  setSelectedItems(selectedItems.map(() => checked));
-};
+  const openEdit = (id) => {
+    const itemToEdit = nhomnhanvien.find(item => item.id === id);
+    setNhomnhanvienData(itemToEdit);
+    setEditingId(id); 
+    setEdit(true);
+  };
 
-const handleItemChange = (index) => (event) => {
-  const checked = event.target.checked;
-  const updatedSelectedItems = [...selectedItems];
-  updatedSelectedItems[index] = checked;
-  setSelectedItems(updatedSelectedItems);
-  setSelectAll(updatedSelectedItems.every((item) => item));
-};
+  const closeEdit = () => {
+    setEdit(false);
+    setNhomnhanvienData({ NhomNhanVien: "" }); 
+  };
 
-const handleChange = (e) => {
-  const { name, value } = e.target;
-  setNhomnhanvien(prevData => ({
-    ...prevData,
-    [name]: value
-  }));
-};
+  const handleSelectAllChange = (event) => {
+    const checked = event.target.checked;
+    setSelectAll(checked);
+    setSelectedItems(selectedItems.map(() => checked));
+  };
 
-const handleSave = () => {
-  try {
-    const newNhomNhanVien = {
-      ...nhomnhanvien,
-      ID: Math.floor(Math.random() * 10000)
-    };
-    NhomNhanVien.push(newNhomNhanVien);
-    toast.success('Nhóm Nhân viên mới đã được tạo thành công!', {
-      position: "top-right",
-    });
-    closeInsert();
-  } catch (error) {
-    toast.error(error.message, {
-      position: "top-right",
-    });
-  }
-};
+  const handleItemChange = (index) => (event) => {
+    const checked = event.target.checked;
+    const updatedSelectedItems = [...selectedItems];
+    updatedSelectedItems[index] = checked;
+    setSelectedItems(updatedSelectedItems);
+    setSelectAll(updatedSelectedItems.every((item) => item));
+  };
 
-const handleEdit = () => {
-  try {
-    const index = NhomNhanVien.findIndex((e) => e.ID === editingId);
-    if (index !== -1) {
-      NhomNhanVien[index] = nhomnhanvien;
-      console.log('Thông tin nhóm nhân viên đã cập nhật:', nhomnhanvien);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setNhomnhanvienData(prevData => ({
+      ...prevData,
+      [name]: value
+    }));
+  };
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    try {
+      const newNhomnhanvien = { ...nhomnhanvienData };
+      await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newNhomnhanvien),
+      });
+      toast.success('Nhóm Nhân viên mới đã được tạo thành công!', {
+        position: "top-right",
+      });
+      fetchGroup(); 
+      closeInsert();
+    } catch (error) {
+      toast.error(error.message, {
+        position: "top-right",
+      });
+    }
+  };
+
+  const handleEdit = async (e) => {
+    e.preventDefault();
+    if (!editingId) return; 
+    try {
+      const response = await fetch(`${API_URL}/${editingId}`, { 
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(nhomnhanvienData),
+      });
+
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(`Cập nhật không thành công: ${errorMessage}`);
+      }
+
       toast.success('Thông tin nhóm nhân viên đã cập nhật', {
         position: "top-right",
       });
+      fetchGroup(); // Đảm bảo fetch lại dữ liệu
       closeEdit(); 
+    } catch (error) {
+      toast.error(error.message, {
+        position: "top-right",
+      });
     }
-  } catch (error) {
-    toast.error(error.message, {
-      position: "top-right",
-    });
-    console.log("Thông tin nhân viên đã cập nhật:", error);
-    navigate('/app/employee_type');
-  }
-};
+  };
 
-const handleRemove = (id) => {
-  try {
-    const updatedList = NhomNhanVien.filter((item) => item.ID !== id);
-    setSelectedItems(updatedList.map(() => false));
-    toast.success('Nhóm Nhân viên đã được xóa thành công!', {
-      position: "top-right",
-    });
+  const handleRemove = async (id) => {
+    if (!id) return; 
+    try {
+      await fetch(`${API_URL}/${id}`, {
+        method: 'DELETE',
+      });
+      toast.success('Nhóm Nhân viên đã được xóa thành công!', {
+        position: "top-right",
+      });
+      fetchGroup(); 
+    } catch (error) {
+      toast.error(error.message, {
+        position: "top-right",
+      });
+    }
+  };
 
-    while (NhomNhanVien.length) { NhomNhanVien.pop(); }
-    updatedList.forEach(item => NhomNhanVien.push(item));
-  } catch (error) {
-    toast.error(error.message, {
-      position: "top-right",
-    });
-  }
-};
   return (
     <div className='branch'>
       <FilterHeader/>
       <FilterSidebar/>
       <div className='branch-table'>
         <div className="branch-table-header">
-              <div className="branch-search-filter">
-                  <input className="branch-search-filter-input" type="text" placeholder='Tìm Kiếm' />
+          <div className="branch-search-filter">
+            <input className="branch-search-filter-input" type="text" placeholder='Tìm Kiếm' />
+          </div>
+          <div className="branch-insert">
+            <button className='branch-insert-button' onClick={openInsert}> + Thêm Nhóm </button>
+          </div>
+          {insert && (
+            <div className='overlay'>
+              <div className='employee-type-insert'>
+                <div className='employee-type-insert-insert'>
+                  <div className="employee-type-title-insert">
+                    Thêm Loại Nhân Viên
+                  </div>
+                  <div className="employee-type-input-insert">
+                    <form onSubmit={handleSave}>
+                      <input
+                        type="text"
+                        onChange={handleChange}
+                        name="NhomNhanVien"
+                        placeholder="Nhập Nhóm nhân viên"
+                        required
+                      />
+                      <div className="employee-type-save">
+                        <button type="submit">Lưu</button>
+                        <button type="button" onClick={closeInsert}>X</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
               </div>
-              <div className="branch-insert">
-                  <button className='branch-insert-button' onClick={openInsert}> + Thêm Nhóm </button>
-              </div>
-              {insert && (
-  <div className='overlay'> 
-    <div className='employee-type-insert'>
-      <div className='employee-type-insert-insert'>
-        <div className="employee-type-title-insert">
-          Thêm Nhóm Nhân Viên
-        </div>
-        <div className="employee-type-input-insert">
-          <input type="text" onChange={handleChange} name="LoaiNhanVien" />
-        </div>
-        <div className="employee-type-save">
-          <button onClick={handleSave}>Lưu</button>
-          <button onClick={closeInsert}>X</button>
-        </div>
-      </div>
-    </div>
-  </div>
-)}
-              <div className="branch-filter">
-                  <button className='branch-filter-coponent'><Filter className="filter-icon"/><span>Bộ Lọc</span></button>
-                  <button className='branch-filter-coponent'><div className="filter-icon"/><span>Tác Vụ</span></button>
-              </div>
+            </div>
+          )}
+          <div className="branch-filter">
+            <button className='branch-filter-coponent'><Filter className="filter-icon"/><span>Bộ Lọc</span></button>
+            <button className='branch-filter-coponent'><div className="filter-icon"/><span>Tác Vụ</span></button>
+          </div>
         </div>
         <div className="branch-table-filter">
-        <div className="branch-table-contain">
+          <div className="branch-table-contain">
             <div className="branch-format-title">
-            <b><input type="checkbox" checked={selectAll} 
-                        onChange={handleSelectAllChange} /></b>
-            <b>ID</b>
-            <b>Nhóm Nhân Viên</b>
-        </div>
-            {NhomNhanVien.map((item,index) => {
-              return (
-                <div className='employee-type-format' key={item.ID}>
-                <td>
+              <b><input type="checkbox" checked={selectAll} onChange={handleSelectAllChange} /></b>
+              <b>ID</b>
+              <b>Nhóm Nhân Viên</b>
+            </div>
+            {nhomnhanvien.map((item, index) => (
+              <div className='employee-type-format' key={item.id}>
+                <div>
                   <input type="checkbox" checked={selectedItems[index]} onChange={handleItemChange(index)} />
-                </td>
-                <td onClick={() => openEdit(item.ID)}>{item.ID}</td>
-                <td onClick={() => openEdit(item.ID)}>{item.NhomNhanVien}</td>
-                {edit && editingId === item.ID && ( 
+                </div>
+                <div onClick={() => openEdit(item.id)}>{item.id}</div>
+                <div onClick={() => openEdit(item.id)}>{item.NhomNhanVien}</div>
+                {edit && editingId === item.id && (
                   <div className='overlay'>
                     <div className='insert'>
                       <div className='insert-insert'>
                         <div className="title-insert">
                           Cập Nhật Nhóm Nhân Viên
                         </div>
-                        <div className="input-insert">
-                          <input type="text" onChange={handleChange} value={nhomnhanvien.NhomNhanVien} name="NhomNhanVien" />
-                        </div>
-                        <div className="save">
-                          <button onClick={handleEdit}>Cập Nhật</button>
-                          <button onClick={closeEdit}>X</button>
-                          <button onClick={() => handleRemove(item.ID)}>Xóa</button>
-                        </div>
+                        <form onSubmit={handleEdit}>
+                          <div className="input-insert">
+                            <input
+                              type="text"
+                              onChange={handleChange}
+                              value={nhomnhanvienData.NhomNhanVien}
+                              name="NhomNhanVien"
+                              required
+                            />
+                          </div>
+                          <div className="save">
+                            <button type="submit">Cập Nhật</button>
+                            <button type="button" onClick={closeEdit}>X</button>
+                            <button type="button" onClick={() => handleRemove(item.id)}>Xóa</button>
+                          </div>
+                        </form>
                       </div>
                     </div>
                   </div>
                 )}
               </div>
-              );
-            })}
-        </div>
+            ))}
+          </div>
         </div>
       </div>
+      <ToastContainer />
     </div>
-  )
+  );
 }
 
-export default EmployeeGroup
+export default EmployeeGroup;

@@ -5,7 +5,6 @@ import FilterHeader from '../../component/FilterHeader/FilterHeader';
 import { useState } from 'react';
 import { Filter} from 'lucide-react';
 import {Link} from "react-router-dom";
-import {NhanVien} from "../../api/data";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';

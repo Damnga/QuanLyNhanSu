@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import "./insert.css";
 import {ChevronDown,Asterisk} from "lucide-react";
-import {NhanVien} from "../../../api/data";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 const insert = ({setIsDialogInsertOpen,}) => {
