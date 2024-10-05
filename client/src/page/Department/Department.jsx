@@ -20,7 +20,7 @@ const [insert, setInsert] = useState(false);
     PhongBan: "",
     ID_ChiNhanh:"",
   });
-  const BRANCH_API_URL = 'http://localhost:1323/ChiNhanh';
+const BRANCH_API_URL = 'http://localhost:1323/ChiNhanh';
 const [branches, setBranches] = useState([]);
   const [phongban,setPhongban]=useState([]);
   useEffect(() => {
@@ -31,7 +31,7 @@ const [branches, setBranches] = useState([]);
     try {
       const response = await fetch(BRANCH_API_URL);
       const data = await response.json();
-      console.log('Fetched branches:', data); // Kiểm tra dữ liệu fetch từ API
+      console.log('Fetched branches:', data); 
       setBranches(data);
     } catch (error) {
       console.error('Error fetching branches:', error);
@@ -186,7 +186,6 @@ const [branches, setBranches] = useState([]);
               type="text"
               onChange={handleChange}
               name="PhongBan"
-              value={phongbanData.PhongBan}
               placeholder="Nhập Phòng Ban"
               required
             />

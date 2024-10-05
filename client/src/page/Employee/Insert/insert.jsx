@@ -3,7 +3,7 @@ import "./insert.css";
 import {ChevronDown,Asterisk} from "lucide-react";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-const insert = ({setIsDialogInsertOpen,}) => {
+const insert = ({onSubmit,onClick,emp_type,level,emply_data}) => {
 
 const [click1,setClick1]=useState(false);
 const eventclick1=()=>{
@@ -106,7 +106,6 @@ const [data, setData] = useState([]);
         setSelectAll(false);
 };
 const [employeeData, setEmployeeData] = useState({
-  ID:"",
   Ten: '',
   Dem: '',
   Ho: '',
@@ -129,30 +128,30 @@ const handleChange = (e) => {
       [name]: value
   }));
 };
-const handleSave = () => {
-  try {
-    const newEmployee = {
-      ...employeeData,
-      ID: Math.floor(Math.random() * 10000)
-  };
-  NhanVien.push(newEmployee);
-  toast.success('Nhân viên mới đã được tạo thành công!', {
-  position: "top-right",
-  });
-  } catch (error) {
-    toast.error(error.message(), {
-      position: "top-right",
-      });
-  }
-};
+// const handleSave = () => {
+//   try {
+//     const newEmployee = {
+//       ...employeeData,
+//       ID: Math.floor(Math.random() * 10000)
+//   };
+//   NhanVien.push(newEmployee);
+//   toast.success('Nhân viên mới đã được tạo thành công!', {
+//   position: "top-right",
+//   });
+//   } catch (error) {
+//     toast.error(error.message(), {
+//       position: "top-right",
+//       });
+//   }
+// };
   return (
     <div className='insert_employee'>
         <div className="save">
-          <button className="btn-save" onClick={handleSave}>
+          <button className="btn-save" onClick={onSubmit}>
             Lưu
           </button>
           <div className="exit">
-            <div onClick={()=>setIsDialogInsertOpen(false)}>X</div>
+            <div onClick={onClick}>X</div>
           </div>
         </div>
         <div className="insert-container">
@@ -162,58 +161,66 @@ const handleSave = () => {
               </div>
               {click1 &&(
                 <div className="input-content" >
+                  <form onSubmit={onSubmit}>
                   <div class="input-group">
                       <div className='input-title'>Họ<Asterisk className='red'/></div>
-                      <input className='input-option' type="text"onChange={handleChange} name="Ho" />
+                      <input className='input-option' type="text" onChange={handleChange} name="Ho" required />
                   </div>
                   <div class="input-group">
                       <div className='input-title'>Tên Đệm<Asterisk className='red'/></div>
-                      <input className='input-option' type="text"onChange={handleChange} name="TenDem" />
+                      <input className='input-option' type="text"onChange={handleChange} name="TenDem" required />
                   </div>
                   <div class="input-group">
                       <div className='input-title'>Tên<Asterisk className='red'/></div>
-                      <input className='input-option' type="text"onChange={handleChange} name="Ten" />
+                      <input className='input-option' type="text"onChange={handleChange} name="Ten" required />
                   </div>
                   <div class="input-group">
                       <div className='input-title'>Giới Tính <Asterisk className='red'/></div>
-                      <input className='input-option' type="text"onChange={handleChange} name="GioiTinh" />
+                      <input className='input-option' type="text"onChange={handleChange} name="GioiTinh" required />
                   </div>
                   <div class="input-group">
                       <div className='input-title'>Ngày Sinh<Asterisk className='red'/></div>
-                      <input className='input-option' type="text"onChange={handleChange} name="NgaySinh" />
+                      <input className='input-option' type="date" onChange={handleChange} name="NgaySinh" required />
                   </div>
                   <div class="input-group">
                       <div className='input-title'>Cấp Bậc<Asterisk className='red'/></div>
-                      <input className='input-option' type="text"onChange={handleChange} name="CapBac" />
-                  </div>
-                  <div class="input-group">
-                      <div className='input-title'>Chi Nhánh<Asterisk className='red'/></div>
-                      <input className='input-option' type="text"onChange={handleChange} name="ChiNhanh" />
+                      <select name="ID_CapBac" value={emply_data.ID_CapBac} onChange={handleChange} required>
+                        <option value="">Chọn Cấp Bậc</option>
+                        {level.map(item => (
+                        <option key={item.id} value={item.id}>{item.CapBac}</option>
+                        ))}
+                      </select>
                   </div>
                   <div class="input-group">
                       <div className='input-title'>Sdt<Asterisk className='red'/></div>
-                      <input className='input-option' type="text"onChange={handleChange} name="Sdt" />
+                      <input className='input-option' type="text"onChange={handleChange} name="Sdt" required  />
                   </div>
                   <div class="input-group">
                       <div className='input-title'>Địa Chỉ<Asterisk className='red'/></div>
-                      <input className='input-option' type="text"onChange={handleChange} name="DiaChi" />
+                      <input className='input-option' type="text"onChange={handleChange} name="DiaChi" required />
                   </div>
                   <div class="input-group">
-                      <div className='input-title'>Loại Nhân Viên</div>
-                      <input className='input-option' type="text"onChange={handleChange} name="LoaiNhanVien" />
+                      <div className='input-title'>Loại Nhân Viên<Asterisk className='red'/></div>
+                      <select name="ID_LoaiNhanVien" value={emply_data.ID_LoaiNhanVien} onChange={handleChange} required>
+                        <option value="">Chọn Loại Nhân Viên</option>
+                        {emp_type.map(item => (
+                        <option key={item.id} value={item.id}>{item.LoaiNhanVien}</option>
+                        ))}
+                      </select>
                   </div>
                   <div class="input-group">
                       <div className='input-title'>Ngày Nhận Việc<Asterisk className='red'/></div>
-                      <input className='input-option' type="text"onChange={handleChange} name="NgayNhanViec" />
+                      <input className='input-option' type="text"onChange={handleChange} name="NgayNhanViec" required />
                   </div>
                   <div class="input-group">
                       <div className='input-title'>CCCD<Asterisk className='red'/></div>
-                      <input className='input-option' type="text"onChange={handleChange} name="CCCD" />
+                      <input className='input-option' type="text"onChange={handleChange} name="CCCD" required />
                   </div>
                   <div class="input-group">
                       <div className='input-title'>Ngày Kết Thúc</div>
-                      <input className='input-option' type="text"onChange={handleChange} name="NgayKetThuc" />
+                      <input className='input-option' type="text"onChange={handleChange} name="NgayKetThuc" required />
                   </div>
+                  </form>
                 </div>
               )}
           </div>

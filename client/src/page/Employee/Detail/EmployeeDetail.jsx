@@ -5,14 +5,57 @@ import { useParams } from 'react-router-dom';
 import { useState } from 'react';
 import { AlignJustify,ChevronLeft,ChevronRight,Ellipsis,UserRound,Paperclip,Star,UserPen,Tag,ChevronDown,Asterisk} from 'lucide-react';
 import CustomHeatmap from '../../../component/CustomHeatmap/CustomHeatmap';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+const EMPLOYEE_API_URL = 'http://localhost:1323/NhanVien';
+const EMPLOYEE_TYPE_API_URL="http://localhost:1323/LoaiNhanVien";
+const LEVEL__API_URL ="http://localhost:1323/CapBac";
 const EmployeeDetail = () => {
   const navigate = useNavigate();
+  const [employeeInfor, setEmployeeInfo] = useState({});
+  const [level,setLevel] =useState([]);
+  const [employeetype,setEmployeetype]=useState([]);
   const {id} =useParams();
-  const nhanvien = NhanVien.find((e)=>e.ID===(id));
+  useEffect(() => {
+    fetchEmployee();
+    fetchEmployeeType();
+    fetchLevel();
+    
+  }, []);
+  const fetchEmployeeType = async () => {
+    try {
+      const response = await fetch(EMPLOYEE_TYPE_API_URL);
+      const data = await response.json();
+      setEmployeetype(data);
+    } catch (error) {
+      console.error('Error fetching branches:', error);
+    }
+  };
+  const fetchLevel = async () => {
+    try {
+      const response = await fetch(LEVEL__API_URL);
+      const data = await response.json();
+      setLevel(data);
+    } catch (error) {
+      console.error('Error fetching branches:', error);
+    }
+  };
+  const fetchEmployee = async () => {
+    try {
+      const response = await fetch(EMPLOYEE_API_URL);
+      const data = await response.json();
+      const employee = data.find((e) => e.id === id); 
+      if (employee) {
+        setEmployeeInfo(employee);
+      } else {
+        console.error('Employee not found');
+      }
+    } catch (error) {
+      console.error('Error fetching employees:', error);
+    }
+  };
 const [click1,setClick1]=useState(false);
 const eventclick1=()=>{
   setClick1(!click1);
@@ -122,7 +165,7 @@ const handleAddRow = () => {
         setSelectedItems(updatedData.map(() => false));
         setSelectAll(false);
 };
-const [employeeInfo, setEmployeeInfo] = useState(nhanvien);
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -131,30 +174,47 @@ const [employeeInfo, setEmployeeInfo] = useState(nhanvien);
         [name]: value
     }));
   };
-const handleSave = () => {
-  try {
-  const index = NhanVien.findIndex((e) => e.ID === nhanvien.ID);
-  NhanVien[index] = employeeInfo;
-  console.log('Thông tin nhân viên đã cập nhật:', employeeInfo);
-  toast.success('Thông tin nhân viên đã cập nhật');
-  } catch (error) {
-    toast.error(error);
-    console.log("Thông tin nhân viên đã cập nhật:",error);
-  }
+  const handleSave = async () => {
+    try {
+        const response = await fetch(`${EMPLOYEE_API_URL}/${id}`, {
+            method: 'PUT', // Hoặc 'PATCH' nếu bạn chỉ muốn cập nhật một số trường
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(employeeInfor), // Chuyển đổi dữ liệu thành JSON
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to update employee information');
+        }
+
+        toast.success('Thông tin nhân viên đã được cập nhật');
+        navigate('/app/employee'); // Chuyển hướng về danh sách nhân viên
+    } catch (error) {
+        toast.error(error.message);
+        console.log("Error updating employee:", error);
+    }
 };
 const [dropdown,setDropdown]= useState(false);
 
 const drop =()=>{
   setDropdown(!dropdown);
 };
-const handleDelete = () => {
-  const index = NhanVien.findIndex((e) => e.ID === nhanvien.ID);
-  if (index !== -1) {
-      NhanVien.splice(index, 1); 
+const handleDelete = async () => {
+  try {
+      const response = await fetch(`${EMPLOYEE_API_URL}/${id}`, {
+          method: 'DELETE',
+      });
+
+      if (!response.ok) {
+          throw new Error('Failed to delete employee');
+      }
+
       toast.success('Nhân viên đã được xóa thành công');
-      navigate('/app/employee');
-  } else {
-      toast.error('Không tìm thấy nhân viên để xóa');
+      navigate('/app/employee'); // Chuyển hướng về danh sách nhân viên
+  } catch (error) {
+      toast.error(error.message);
+      console.log("Error deleting employee:", error);
   }
 };
 
@@ -162,7 +222,7 @@ const handleDelete = () => {
     <div className='employee-detail'>
       <div className="header">
           <div className="header-left">
-              <AlignJustify/> 
+              <AlignJustify/> Nhân Viên <ChevronRight/> {employeeInfor.Ho} {employeeInfor.Dem} {employeeInfor.Ten}
           </div>
           <div className="header-right">
               <div className="arrow-left">
@@ -181,7 +241,7 @@ const handleDelete = () => {
       </div>
       <div className="sidebar">
           <div className="image">
-                {nhanvien.Ten}
+                {employeeInfor.Ten}
           </div>
           <div className="giao">
             <div className="giao-content">
@@ -242,61 +302,69 @@ const handleDelete = () => {
   </div>
   {click1 && (
     <div>
+      <form onSubmit={handleSave}>
       <div className="input-content">
         <div className="input-group">
           <div className='input-title'>Họ</div>
-          <input className='input-option' type="text" name="Ho" value={employeeInfo.Ho} onChange={handleChange} />
+          <input className='input-option' type="text" name="Ho" value={employeeInfor.Ho} onChange={handleChange} />
         </div>
         <div className="input-group">
           <div className='input-title'>Tên Đệm</div>
-          <input className='input-option' type="text" name="TenDem" value={employeeInfo.Dem} onChange={handleChange} />
+          <input className='input-option' type="text" name="Dem" value={employeeInfor.Dem} onChange={handleChange} />
         </div>
         <div className="input-group">
           <div className='input-title'>Tên</div>
-          <input className='input-option' type="text" name="Ten" value={employeeInfo.Ten} onChange={handleChange} />
+          <input className='input-option' type="text" name="Ten" value={employeeInfor.Ten} onChange={handleChange} />
         </div>
         <div className="input-group">
           <div className='input-title'>Giới Tính</div>
-          <input className='input-option' type="text" name="GioiTinh" value={employeeInfo.GioiTinh} onChange={handleChange} />
+          <input className='input-option' type="text" name="GioiTinh" value={employeeInfor.GioiTinh} onChange={handleChange} />
         </div>
         <div className="input-group">
           <div className='input-title'>Ngày Sinh</div>
-          <input className='input-option' type="text" name="NgaySinh" value={employeeInfo.NgaySinh} onChange={handleChange} />
+          <input className='input-option' type="date" name="NgaySinh" value={employeeInfor.NgaySinh} onChange={handleChange} />
         </div>
         <div className="input-group">
           <div className='input-title'>Cấp Bậc</div>
-          <input className='input-option' type="text" name="CapBac" value={employeeInfo.CapBac} onChange={handleChange} />
-        </div>
-        <div className="input-group">
-          <div className='input-title'>Chi Nhánh</div>
-          <input className='input-option' type="text" name="ChiNhanh" value={employeeInfo.ChiNhanh} onChange={handleChange} />
+          <select name="ID_CapBac" value={employeeInfor.ID_CapBac} onChange={handleChange}>
+                  <option value="">Chọn Cấp Bậc</option>
+                  {level.map(item => (
+                    <option key={item.id} value={item.id}>{item.CapBac}</option>
+                  ))}
+                </select>
         </div>
         <div className="input-group">
           <div className='input-title'>Sdt</div>
-          <input className='input-option' type="text" name="Sdt" value={employeeInfo.Sdt} onChange={handleChange} />
+          <input className='input-option' type="text" name="Sdt" value={employeeInfor.Sdt} onChange={handleChange} />
         </div>
         <div className="input-group">
           <div className='input-title'>Địa Chỉ</div>
-          <input className='input-option' type="text" name="DiaChi" value={employeeInfo.DiaChi} onChange={handleChange} />
+          <input className='input-option' type="text" name="DiaChi" value={employeeInfor.DiaChi} onChange={handleChange} />
         </div>
         <div className="input-group">
           <div className='input-title'>Loại Nhân Viên</div>
-          <input className='input-option' type="text" name="LoaiNhanVien" value={employeeInfo.LoaiNhanVien} onChange={handleChange} />
+          <select name="ID_LoaiNhanVien" value={employeeInfor.ID_LoaiNhanVien} onChange={handleChange}>
+                  <option value="">Chọn Loại Nhân Viên</option>
+                  {employeetype.map(item => (
+                    <option key={item.id} value={item.id}>{item.LoaiNhanVien}</option>
+                  ))}
+                </select>
         </div>
         <div className="input-group">
           <div className='input-title'>Ngày Nhận Việc</div>
-          <input className='input-option' type="text" name="NgayNhanViec" value={employeeInfo.NgayBatDau} onChange={handleChange} />
+          <input className='input-option' type="date" name="NgayBatDau" value={employeeInfor.NgayBatDau} onChange={handleChange} />
         </div>
         <div className="input-group">
           <div className='input-title'>CCCD</div>
-          <input className='input-option' type="text" name="CCCD" value={employeeInfo.CCCD} onChange={handleChange} />
+          <input className='input-option' type="text" name="CCCD" value={employeeInfor.CCCD} onChange={handleChange} />
         </div>
         <div className="input-group">
           <div className='input-title'>Ngày Kết Thúc</div>
-          <input className='input-option' type="text" name="NgayKetThuc" value={employeeInfo.NgayKetThuc} onChange={handleChange} />
+          <input className='input-option' type="date" name="NgayKetThuc" value={employeeInfor.NgayKetThuc} onChange={handleChange} />
         </div>
       </div>
-      <button className='save-part' onClick={handleSave}>Lưu</button>
+      <button type="submit" className='save-part' >Lưu</button>
+      </form>
     </div>
   )}
 </div>

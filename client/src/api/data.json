@@ -1,4 +1,5 @@
 {
+  "NhanVien": [],
   "LoaiNhanVien": [
     {
       "ID": "002",
@@ -33,13 +34,8 @@
     },
     {
       "ID": "005",
-      "ChiNhanh": "Nha Trang",
+      "ChiNhanh": "Nha ",
       "id": "e3c2"
-    },
-    {
-      "id": "8c30",
-      "ID": "006",
-      "ChiNhanh": "Huế"
     }
   ],
   "PhongBan": [

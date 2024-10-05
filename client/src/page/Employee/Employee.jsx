@@ -9,81 +9,79 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
 import Insert from "./Insert/insert";
+const API_URL = 'http://localhost:3000/NhanVien';
 const Employee = ({open,setOpen,onHeaderClick,clickLink,toggleDialog}) => {
   const navigate = useNavigate();
-  useEffect(() => {
-    setOpen(true);
-  }, [clickLink]);
   const [selectAll, setSelectAll] = useState(false);
-  const [selectedItems, setSelectedItems] = useState(NhanVien.map(() => false));
-  const [data,setData]=useState(NhanVien);
+  const [selectedItems, setSelectedItems] = useState(null);
   const [insert, setInsert] = useState(false);
   const [edit, setEdit] = useState(false);
   const [editingId, setEditingId] = useState(null); 
-  const [employee, setEmployee] = useState({
-    ID: "",
-    Ten:"",
-    Dem:"",
-    Ho:"",
-    Email:"",
-    LoaiNhanVien:"",
-    CapBac:"",
-    ChiNhanh: "",
-    NgayBatDau:"",
-    NgayKetThuc:"",
-    GioiTinh:"",
-    Sdt:"",
-    DiaChi:"",
-    CCCD:"",
-    NgaySinh:""
+  const [employeeData, setEmployeeData] = useState({
+    Ten:"", Dem:"", Ho:"",Email:"",ID_LoaiNhanVien:"",ID_CapBac:"",NgayBatDau:"",NgayKetThuc:"",  GioiTinh:"", Sdt:"",DiaChi:"",CCCD:"",NgaySinh:""
   });
+  const EMPLOYEETYPE__API_URL ="http://localhost:3000/LoaiNhanVien";
+  const LEVEL__API_URL ="http://localhost:3000/CapBac";
+  const [employeetype,setEmployeetype]=useState([]);
+  const [level,setLevel] =useState([]);
+  const [employee,setEmployee]=useState([]);
+  useEffect(() => {
+    setOpen(true);
+    fetchEmployeeType();
+    fetchLevel();
+    fetchEmployee();
+  }, [clickLink]);
+  const fetchEmployeeType = async () => {
+    try {
+      const response = await fetch(EMPLOYEETYPE__API_URL);
+      const data = await response.json();
+      console.log('Fetched branches:', data); 
+      setEmployeetype(data);
+    } catch (error) {
+      console.error('Error fetching branches:', error);
+    }
+  };
+  const fetchLevel = async () => {
+    try {
+      const response = await fetch(LEVEL__API_URL);
+      const data = await response.json();
+      console.log('Fetched branches:', data); 
+      setLevel(data);
+    } catch (error) {
+      console.error('Error fetching branches:', error);
+    }
+  };
+  const fetchEmployee = async () => {
+    try {
+      const response = await fetch(API_URL);
+      const data = await response.json();
+      setEmployee(data);
+      setSelectedItems(data.map(() => false)); 
+      console.log('Rendering EmployeeType component', employee);
+    } catch (error) {
+      console.error('Error fetching employee types:', error);
+    }
+  };
   const openInsert = () => {
     setInsert(true);
   };
-
   const closeInsert = () => {
-    setEmployee(false);
-    setEmployee({ ID: "",
-      Ten:"",
-      Dem:"",
-      Ho:"",
-      Email:"",
-      LoaiNhanVien:"",
-      CapBac:"",
-      ChiNhanh: "",
-      NgayBatDau:"",
-      NgayKetThuc:"",
-      GioiTinh:"",
-      Sdt:"",
-      DiaChi:"",
-      CCCD:"",
-      NgaySinh:"" }); 
+    setInsert(false);
+    setEmployeeData({
+      Ten:"", Dem:"", Ho:"",Email:"",ID_LoaiNhanVien:"",ID_CapBac:"",NgayBatDau:"",NgayKetThuc:"",  GioiTinh:"", Sdt:"",DiaChi:"",CCCD:"",NgaySinh:"" }); 
   };
 
   const openEdit = (id) => {
-    const itemToEdit = NhanVien.find(item => item.ID === id);
-    setEmployee(itemToEdit);
+    const itemToEdit = employee.find(item => item.id === id);
+    setEmployeeData(itemToEdit);
     setEditingId(id); 
     setEdit(true);
   };
 
   const closeEdit = () => {
     setEdit(false);
-    setEmployee({ ID: "",
-      Ten:"",
-      Dem:"",
-      Ho:"",
-      Email:"",
-      LoaiNhanVien:"",
-      CapBac:"",
-      ChiNhanh: "",
-      NgayBatDau:"",
-      NgayKetThuc:"",
-      GioiTinh:"",
-      Sdt:"",
-      DiaChi:"",
-      CCCD:"",
-      NgaySinh:""}); 
+    setEmployeeData({
+      Ten:"", Dem:"", Ho:"",Email:"",ID_LoaiNhanVien:"",ID_CapBac:"",NgayBatDau:"",NgayKetThuc:"",  GioiTinh:"", Sdt:"",DiaChi:"",CCCD:"",NgaySinh:"" }); 
   };
 
   const handleSelectAllChange = (event) => {
@@ -102,22 +100,26 @@ const Employee = ({open,setOpen,onHeaderClick,clickLink,toggleDialog}) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setEmployee(prevData => ({
+    setEmployeeData(prevData => ({
       ...prevData,
       [name]: value
     }));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     try {
       const newEmployee = {
-        ...employee,
-        ID: Math.floor(Math.random() * 10000)
+        ...employeeData,
       };
-      NhanVien.push(newEmployee);
+      await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newEmployee),
+      });
       toast.success('Nhân Viên mới đã được tạo thành công!', {
         position: "top-right",
       });
+      fetchEmployee();
       closeInsert();
     } catch (error) {
       toast.error(error.message, {
@@ -125,43 +127,56 @@ const Employee = ({open,setOpen,onHeaderClick,clickLink,toggleDialog}) => {
       });
     }
   };
-
-  const handleEdit = () => {
+  const handleEdit =async (id) => {
+    if (!editingId) return; 
     try {
-      const index = NhanVien.findIndex((e) => e.ID === editingId);
-      if (index !== -1) {
-        NhanVien[index] = employee;
-        console.log('Thông tin nhân viên đã cập nhật:', employee);
-        toast.success('Thông tin nhân viên đã cập nhật', {
-          position: "top-right",
+        const response = await fetch(`${API_URL}/${id}`, { 
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(employeeData),
         });
+
+        if (!response.ok) {
+            const errorMessage = await response.text();
+            throw new Error(`Cập nhật không thành công: ${errorMessage}`);
+        }
+
+        toast.success('Thông tin nhân viên đã cập nhật', {
+            position: "top-right",
+        });
+        await fetchEmployee(); 
         closeEdit(); 
-      }
     } catch (error) {
-      toast.error(error.message, {
-        position: "top-right",
-      });
-      console.log("Thông tin nhân viên đã cập nhật:", error);
-      navigate('/app/employee');
+        toast.error(error.message, {
+            position: "top-right",
+        });
     }
   };
-
-  const handleRemove = (id) => {
+  const handleRemove = async (id) => {
+    if (!id) return; 
     try {
-      const updatedList = NhanVien.filter((item) => item.ID !== id);
-      setSelectedItems(updatedList.map(() => false));
-      toast.success('Nhân Viên đã được xóa thành công!', {
-        position: "top-right",
-      });
-
-      while (NhanVien.length) { NhanVien.pop(); }
-      updatedList.forEach(item => NhanVien.push(item));
+        await fetch(`${API_URL}/${id}`, {
+            method: 'DELETE',
+        });
+        toast.success('Nhân viên đã được xóa thành công!', {
+            position: "top-right",
+        });
+        fetchEmployee(); 
     } catch (error) {
-      toast.error(error.message, {
-        position: "top-right",
-      });
+        toast.error(error.message, {
+            position: "top-right",
+        });
     }
   };
+  const getEmployeeTypeNameById = (id) => {
+    const emp_type = employeetype.find(emp_type => emp_type.id === id);
+    return emp_type ? emp_type.LoaiNhanVien : 'Unknown';
+  };
+  const getLevelNameById = (id) => {
+    const lev = level.find(lev => lev.id === id);
+    return lev ? lev.CapBac : 'Unknown';
+  };
+
     const deleteSelectedItems = () => {
       const remainingItems = data.filter((_, index) => !selectedItems[index]);
       setData(remainingItems);
@@ -181,9 +196,46 @@ const Employee = ({open,setOpen,onHeaderClick,clickLink,toggleDialog}) => {
                   <button className='insert-button' onClick={openInsert}> + Thêm Nhân Viên</button>
               </div>
               {insert && (
-            <div className='overlay'> 
-              <Insert onClick ={closeEdit}/>
-            </div>
+  <div className='overlay'>
+    <div className='employee-type-insert'>
+      <div className='employee-type-insert-insert'>
+        <div className="employee-type-title-insert">
+          Thêm Nhân Viên
+        </div>
+        <div className="employee-type-input-insert">
+        <form onSubmit={handleSave}>
+          <input type="text" onChange={handleChange} name="Ho" placeholder="Nhập Họ"required />
+          <input type="text" onChange={handleChange} name="Dem" placeholder="Nhập Tên Đệm"required />
+          <input type="text" onChange={handleChange} name="Ten" placeholder="Nhập Tên"required />
+          <input type="text" onChange={handleChange} name="Email" placeholder="Nhập Email"required />
+          <select  name="ID_LoaiNhanVien" value={employeeData.ID_LoaiNhanVien} onChange={handleChange} required>
+            <option value="">Chọn Loại Nhân Viên</option>
+            {employeetype.map(item => (
+            <option key={item.id} value={item.id}>{item.LoaiNhanVien}</option>
+            ))}
+          </select>
+          <input type="text" onChange={handleChange} name="GioiTinh" placeholder="Nhập Giới Tính"required />
+          <input type="date" onChange={handleChange} name="NgaySinh" placeholder="Nhập Ngày Sinh"required />
+          <input type="text" onChange={handleChange} name="Sdt" placeholder="Nhập Số Điện Thoại"required />
+          <select  name="ID_CapBac" value={employeeData.ID_CapBac} onChange={handleChange} required>
+            <option value="">Chọn Cấp Bậc</option>
+            {level.map(item => (
+            <option key={item.id} value={item.id}>{item.CapBac}</option>
+            ))}
+          </select>
+          <input type="text" onChange={handleChange} name="DiaChi" placeholder="Nhập Nhập Địa Chỉ"required />
+          <input type="date" onChange={handleChange} name="NgayBatDau" placeholder="Nhập Ngày Nhận Việc"required />
+          <input type="date" onChange={handleChange} name="NgayKetThuc" placeholder="Nhập Ngày Kết Thúc"/>
+          <input type="text" onChange={handleChange} name="CCCD" placeholder="Nhập CCCD"required />
+          </form>
+        </div>
+        <div className="employee-type-save">
+          <button onClick={handleSave}>Lưu</button>
+          <button onClick={closeInsert}>X</button>
+        </div>
+      </div>
+    </div>
+  </div>
 )}
   <div className="filter">
    <button className='filter-coponent'><Filter className="filter-icon"/><span>Bộ Lọc</span></button>
@@ -201,38 +253,37 @@ const Employee = ({open,setOpen,onHeaderClick,clickLink,toggleDialog}) => {
             <b>Ngày Sinh</b>
             <b>Địa Chỉ</b>
             <b>Cấp Bậc</b>
-            <b>Chi Nhánh</b>
             <b>Sđt</b>
             <b>Loại Nhân Viên</b>
             <b>CCCD</b>
             <b>Ngày Nhận Việc</b>
             <b>Ngày Kết Thúc</b>
         </div>
-            {NhanVien.map((item,index) => {
+            {employee.map((item,index) => {
               return (
-              <div  className='format' key={item.ID}>
-                    <td ><input type="checkbox"  checked={selectedItems[index]} 
-                            onChange={handleItemChange(index)} /></td>
-                    <Link to={`/employee/${item.ID}`}><td >{item.ID}</td></Link>
-                    <Link to={`/employee/${item.ID}`}><td >{item.Ho} {item.Dem} {item.Ten}</td></Link>
-                    <Link to={`/employee/${item.ID}`}><td >{item.GioiTinh}</td></Link>
-                    <Link to={`/employee/${item.ID}`}><td >{item.NgaySinh}</td></Link>
-                    <Link to={`/employee/${item.ID}`}><td >{item.DiaChi}</td></Link>
-                    <Link to={`/employee/${item.ID}`}><td >{item.CapBac}</td></Link>
-                    <Link to={`/employee/${item.ID}`}><td >{item.ChiNhanh}</td></Link>
-                    <Link to={`/employee/${item.ID}`}><td >{item.Sdt}</td></Link>
-                    <Link to={`/employee/${item.ID}`}><td >{item.LoaiNhanVien}</td></Link>
-                    <Link to={`/employee/${item.ID}`}><td >{item.CCCD}</td></Link>
-                    <Link to={`/employee/${item.ID}`}><td >{item.NgayBatDau}</td></Link>
-                    <Link to={`/employee/${item.ID}`}><td >{item.NgayKetThuc}</td></Link>
+              <div  className='format' key={item.id}>
+                    <div ><input type="checkbox"  checked={selectedItems[index]} 
+                            onChange={handleItemChange(index)} /></div>
+                    <Link to={`/employee/${item.id}`}><div >{item.id}</div></Link>
+                    <Link to={`/employee/${item.id}`}><div >{item.Ho} {item.Dem} {item.Ten}</div></Link>
+                    <Link to={`/employee/${item.id}`}><div >{item.GioiTinh}</div></Link>
+                    <Link to={`/employee/${item.id}`}><div >{item.NgaySinh}</div></Link>
+                    <Link to={`/employee/${item.id}`}><div >{item.DiaChi}</div></Link>
+                    <Link to={`/employee/${item.id}`}><div >{getLevelNameById(item.ID_CapBac)}</div></Link>
+                    <Link to={`/employee/${item.id}`}><div >{item.Sdt}</div></Link>
+                    <Link to={`/employee/${item.id}`}><div >{getEmployeeTypeNameById(item.ID_LoaiNhanVien)}</div></Link>
+                    <Link to={`/employee/${item.id}`}><div >{item.CCCD}</div></Link>
+                    <Link to={`/employee/${item.id}`}><div >{item.NgayBatDau}</div></Link>
+                    <Link to={`/employee/${item.id}`}><div >{item.NgayKetThuc}</div></Link>
               </div>
               );
             })}
         </div>
         </div>
       </div>
+      <ToastContainer />
     </div>
-  )
+  );
 }
 
 export default Employee
